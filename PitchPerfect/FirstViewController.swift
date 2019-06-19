@@ -10,7 +10,7 @@ import UIKit
 import UserNotifications
 import AVFoundation
 
-class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, AVAudioRecorderDelegate {
+class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, AVAudioRecorderDelegate, UITextFieldDelegate {
 
     @IBOutlet weak var textBox: UITextField!
     @IBOutlet weak var recordButton: UIButton!
@@ -24,6 +24,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, A
         
         // Do any additional setup after loading the view.
         UNUserNotificationCenter.current().delegate = self
+        textBox.delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -46,8 +47,6 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, A
     }
     
     @IBAction func notificationButtonPress(_ sender: Any) {
-        print("pressed notification button")
-        
         let content = UNMutableNotificationContent()
         content.title = "notificacion"
         content.body = textBox.text != "" ? textBox.text! : "bla bla bla"
@@ -87,7 +86,6 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, A
         recordingLabel.text = "Tap to Record"
         
         audioRecorder.stop()
-//        let session = AVAudioSession.sharedInstance()
         try! session.setActive(false)
     }
     
@@ -103,6 +101,11 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, A
             let recordedAudioURL = sender as! URL
             playSoundVC.recordedAudioURL = recordedAudioURL
         }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
 
