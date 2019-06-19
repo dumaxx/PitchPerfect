@@ -57,8 +57,6 @@ extension SecondViewController: AVAudioPlayerDelegate {
         if let rate = rate {
             changeRatePitchNode.rate = rate
         }
-//        setupAudio()
-        
         audioEngine.attach(changeRatePitchNode)
         
         // node for echo

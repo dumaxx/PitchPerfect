@@ -11,6 +11,8 @@ import UserNotifications
 import AVFoundation
 
 class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, AVAudioRecorderDelegate, UITextFieldDelegate {
+    
+    // MARK: Variables
 
     @IBOutlet weak var textBox: UITextField!
     @IBOutlet weak var recordButton: UIButton!
@@ -18,6 +20,9 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, A
     @IBOutlet weak var recordingLabel: UILabel!
     var audioRecorder: AVAudioRecorder!
     let session = AVAudioSession.sharedInstance()
+    var notificationsAmount = 0
+    
+    // MARK: Load functions
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,13 +35,26 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, A
     override func viewWillAppear(_ animated: Bool) {
         //Stop recording button disabled
         super.viewWillAppear(animated)
-        stopRecordingButton.isEnabled = false
+        configureUI(false)
+    }
+    
+    // MARK: UI Functions
+    
+    func configureUI(_ recording : Bool) {
+        if(recording) {
+            recordingLabel.text = "Recording in progress"
+            recordButton.isEnabled = false
+            stopRecordingButton.isEnabled = true
+        } else {
+            recordButton.isEnabled = true
+            stopRecordingButton.isEnabled = false
+            recordingLabel.text = "Tap to Record"
+        }
     }
     
     @IBAction func onButtonPressed(_ sender: Any) {
         let alert = UIAlertController(title: "Alert", message: textBox.text != "" ? textBox.text : "no ingreso texto", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-            NSLog("The \"OK\" alert occured.")
             self.userPressedOk()
         }))
         self.present(alert, animated: true, completion: nil)
@@ -48,23 +66,32 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, A
     
     @IBAction func notificationButtonPress(_ sender: Any) {
         let content = UNMutableNotificationContent()
+        let appIdentifier = "PitchPerfect"
         content.title = "notificacion"
         content.body = textBox.text != "" ? textBox.text! : "bla bla bla"
         content.sound = UNNotificationSound.default
         content.badge = 0
-        content.categoryIdentifier = "app-notification"
+        content.categoryIdentifier = appIdentifier
+        content.threadIdentifier = appIdentifier
+        notificationsAmount += 1
+        let requestId = appIdentifier + String(notificationsAmount)
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
         
-        let request = UNNotificationRequest(identifier: "app-notification", content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: requestId, content: content, trigger: trigger)
+        
+        //Category
+        let snoozeAction = UNNotificationAction(identifier: "Snooze", title: "Snooze", options: [])
+        let deleteAction = UNNotificationAction(identifier: "Delete", title: "Delete", options: [.destructive])
+        let category = UNNotificationCategory(identifier: appIdentifier, actions: [snoozeAction, deleteAction], intentIdentifiers: [], options: [])
+        
+        UNUserNotificationCenter.current().setNotificationCategories([category])
         
         UNUserNotificationCenter.current().add(request)
     }
     
     @IBAction func recordButtonPress(_ sender: Any) {
-        recordingLabel.text = "Recording in progress"
-        recordButton.isEnabled = false
-        stopRecordingButton.isEnabled = true
+        configureUI(true)
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
         let recordingName = "recordedVoice.wav"
@@ -81,9 +108,7 @@ class FirstViewController: UIViewController, UNUserNotificationCenterDelegate, A
     }
     
     @IBAction func stopRecordingButtonPress(_ sender: Any) {
-        recordButton.isEnabled = true
-        stopRecordingButton.isEnabled = false
-        recordingLabel.text = "Tap to Record"
+        configureUI(false)
         
         audioRecorder.stop()
         try! session.setActive(false)

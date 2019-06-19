@@ -11,6 +11,8 @@ import AVFoundation
 
 class SecondViewController: UIViewController {
     
+    // MARK: IBOutlets
+    
     //First row
     @IBOutlet weak var slowButton: UIButton!
     @IBOutlet weak var fastButton: UIButton!
@@ -23,6 +25,8 @@ class SecondViewController: UIViewController {
     //Stop button
     @IBOutlet weak var stopButton: UIButton!
     
+    // MARK: Variables
+    
     var recordedAudioURL: URL!
     var audioFile:AVAudioFile!
     var audioEngine:AVAudioEngine!
@@ -32,6 +36,8 @@ class SecondViewController: UIViewController {
     enum ButtonType: Int {
         case slow = 0, fast, fastPitch, vaderPitch, echo, reverb
     }
+    
+    // MARK: Load functions
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,6 +57,8 @@ class SecondViewController: UIViewController {
         super.viewWillAppear(animated)
         configureUI(.notPlaying)
     }
+    
+    // MARK: UI Functions
 
     @IBAction func playSoundPressed(_ sender: UIButton) {
         switch(ButtonType(rawValue: sender.tag)!) {
